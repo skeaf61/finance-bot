@@ -22,6 +22,7 @@ async def set_main_menu(bot: Bot):
         types.BotCommand(command="/expense", description="📉 Записать расход"),
         types.BotCommand(command="/income", description="💰 Записать доход"),
         types.BotCommand(command="/stats", description="📊 Статистика за месяц"),
+        types.BotCommand(command="/delete_by_id", description="🔍 Удалить расход по номеру операции"),
         types.BotCommand(command="/cancel", description="❌ Отмена действия")
     ]
     await bot.set_my_commands(main_menu_commands)

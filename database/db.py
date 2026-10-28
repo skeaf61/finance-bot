@@ -32,15 +32,19 @@ def init_db():
     conn.close()
 
 def add_transaction(table: str, user_id: int, date: str, category: str, amount: float):
-    """Добавление расхода или дохода"""
+    """Добавление расхода или дохода. Возвращает ID созданной записи."""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute(
         f"INSERT INTO {table} (user_id, date, category, amount) VALUES (?, ?, ?, ?)",
         (user_id, date, category, amount)
     )
+     # 🔥 Получаем ID последней вставленной строки
+    inserted_id = cursor.lastrowid
+    
     conn.commit()
     conn.close()
+    return inserted_id
 
 def get_monthly_stats(user_id: int, month_str: str):
     """Получение агрегированных данных за месяц (формат ГГГГ-ММ)"""
@@ -58,3 +62,35 @@ def get_monthly_stats(user_id: int, month_str: str):
     
     conn.close()
     return total_inc, total_exp, month_categories
+
+
+
+# Удаление записи по id
+def delete_transaction_by_id_and_table(table: str, user_id: int, transaction_id: int) -> bool:
+    """
+    Удаляет запись по ID из конкретной таблицы (expenses или incomes).
+    Проверяет, принадлежит ли запись пользователю.
+    """
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    # table подставляется безопасно, так как мы берем её из нашего фиксированного кода кнопок
+    cursor.execute(f"DELETE FROM {table} WHERE id = ? AND user_id = ?", (transaction_id, user_id))
+    changes = cursor.rowcount
+    
+    conn.commit()
+    conn.close()
+    return changes > 0
+# ---
+
+# Достает конкретную запись по id (для последующего удаления)
+def get_transaction_by_id(table: str, user_id: int, transaction_id: int) -> tuple | None:
+    """Получает конкретную запись из таблицы по её ID и user_id"""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    cursor.execute(f"SELECT date, category, amount FROM {table} WHERE id = ? AND user_id = ?", (transaction_id, user_id))
+    row = cursor.fetchone()
+    
+    conn.close()
+    return row

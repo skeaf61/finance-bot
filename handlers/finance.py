@@ -119,16 +119,19 @@ async def process_category(callback: types.CallbackQuery, state: FSMContext):
     date = user_data["date"]
     db_category = CATEGORIES[t_type][category_btn]
     
-    # 🔥 Вызываем функцию сохранения в БД
+    # Вызываем функцию сохранения в БД
     table = "expenses" if t_type == "expense" else "incomes"
-    add_transaction(table, callback.from_user.id, date, db_category, amount)
+    transaction_id = add_transaction(table, callback.from_user.id, date, db_category, amount)
     
     f_date = datetime.strptime(date, "%Y-%m-%d").strftime("%d.%m.%Y")
+    
     await callback.message.edit_text(
         f"✅ Успешно записано!\n\n"
+        f"🆔 **ID операции:** #{transaction_id}\n"
         f"Тип: {'Расход' if t_type=='expense' else 'Доход'}\n"
         f"Сумма: {amount} руб.\n"
         f"Дата: {f_date}\n"
-        f"Категория: {db_category}"
+        f"Категория: {db_category}",
+        parse_mode="Markdown"
     )
     await state.clear()

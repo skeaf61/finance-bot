@@ -13,7 +13,7 @@ async def cmd_start(message: types.Message):
         "/expense — записать расход\n"
         "/income — записать доход\n"
         "/stats - Статистика за месяц\n"
-        "/history - Удаление истории"
+        "/delete_by_id - Удалить расход по номеру операции"
     )
 
 @router.message(Command("cancel"), ~F.state(None))
